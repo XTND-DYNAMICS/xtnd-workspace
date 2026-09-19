@@ -1,0 +1,41 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "xtnd-workspace-api",
+  "account_id": "b4a9d6d55078009ff75dfac01f83fe80",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-19",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": {
+    "enabled": true
+  },
+  "vars": {
+    "XAUTH_ISSUER": "https://api.auth.xgi.io",
+    "XAUTH_JWKS_URL": "https://api.auth.xgi.io/.well-known/jwks.json",
+    "XAUTH_AUDIENCE": "xworkspace",
+    "CORS_ORIGINS": "https://workspace.xgi.io,http://127.0.0.1:4320,http://localhost:4320"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "xtnd-workspace",
+      "database_id": "d5d08a03-63d6-4e5e-a7a0-76b2d0fb4bfd",
+      "migrations_dir": "migrations"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "ASSETS",
+      "bucket_name": "xtnd-workspace-assets"
+    }
+  ],
+  "routes": [
+    {
+      "pattern": "workspace-api.xgi.io",
+      "custom_domain": true
+    }
+  ]
+}

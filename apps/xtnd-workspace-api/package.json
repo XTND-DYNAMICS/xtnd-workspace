@@ -1,0 +1,28 @@
+{
+  "name": "@xtnd-dynamics/xworkspace-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "build": "tsc --noEmit",
+    "check": "tsc --noEmit",
+    "test": "node --test tests/*.test.ts",
+    "dev": "wrangler dev --ip 127.0.0.1 --port 8788 --inspector-port 9239",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "@xtnd-dynamics/xworkspace-core": "*",
+    "@xtnd-dynamics/xds-runtime": "*",
+    "jose": "^6.2.10",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250224.0",
+    "@types/node": "^24.0.0",
+    "typescript": "~6.0.2",
+    "wrangler": "^3.114.0"
+  }
+}

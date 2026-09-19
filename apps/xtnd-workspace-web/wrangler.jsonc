@@ -1,0 +1,16 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "xtnd-workspace-web",
+  "account_id": "b4a9d6d55078009ff75dfac01f83fe80",
+  "compatibility_date": "2025-04-01",
+  "assets": {
+    "directory": "./dist/xtnd-workspace-web/browser",
+    "not_found_handling": "single-page-application"
+  },
+  "routes": [
+    { "pattern": "workspace.xgi.io", "custom_domain": true }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
