@@ -1,21 +1,17 @@
-import { Component, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, output, signal } from '@angular/core';
 import { XTND_FAMILY_APPS, FamilyApp } from '../../components/shell/app-switcher';
+import { UserMenuComponent } from './user-menu.component';
+import { AppUpdateModalComponent } from './update-modal.component';
 
 @Component({
   selector: 'app-top-bar',
   standalone: true,
+  imports: [UserMenuComponent, AppUpdateModalComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <header class="top-bar">
       <div class="top-bar-left">
-        <button class="icon-btn menu-toggle" aria-label="Toggle navigation">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-
+        <!-- Main menu button removed per founder instruction -->
         <a href="/" class="brand-link">
           <span class="brand-glyph">X</span>
           <span class="product-title">WORKSPACE</span>
@@ -45,6 +41,17 @@ import { XTND_FAMILY_APPS, FamilyApp } from '../../components/shell/app-switcher
       </div>
 
       <div class="top-bar-right">
+        <!-- Version Control & Build Stamp Pill cloned from XMail -->
+        <button 
+          type="button" 
+          class="version-stamp-btn" 
+          (click)="updateModalOpen.set(true)"
+          title="App Management & Releases · Click to manage version"
+        >
+          <span class="version-dot"></span>
+          <span class="version-text">Fully Updated · v0.1.0</span>
+        </button>
+
         <div class="sso-badge" title="SSO Active via XAUTH federated to Google Workspace">
           <span class="sso-dot"></span>
           <span class="sso-user">pm&#64;xgi.io</span>
@@ -94,9 +101,29 @@ import { XTND_FAMILY_APPS, FamilyApp } from '../../components/shell/app-switcher
           }
         </div>
 
-        <div class="user-avatar" title="Peter A. Moelgaard (Google Workspace Federated)">
-          <span>PM</span>
-        </div>
+        <!-- User Avatar Widget (identical to XMail/X360) -->
+        <button 
+          type="button" 
+          class="user-avatar-btn" 
+          (click)="toggleUserMenu()"
+          aria-label="User account menu"
+          [attr.aria-expanded]="userMenuOpen()"
+        >
+          <span class="avatar-ring"></span>
+          <span class="avatar-label">PM</span>
+        </button>
+
+        <app-user-menu 
+          [isOpen]="userMenuOpen()"
+          (closeMenu)="userMenuOpen.set(false)"
+          (openSettings)="onOpenSettings($event)"
+          (openUpdateModal)="onOpenUpdateModal()"
+        ></app-user-menu>
+
+        <app-update-modal
+          [open]="updateModalOpen()"
+          (close)="updateModalOpen.set(false)"
+        ></app-update-modal>
       </div>
     </header>
   `,
@@ -107,148 +134,171 @@ import { XTND_FAMILY_APPS, FamilyApp } from '../../components/shell/app-switcher
       align-items: center;
       justify-content: space-between;
       padding: 0 16px;
-      background: var(--surface-raised, #FFFFFF);
-      border-bottom: 1px solid var(--border-subtle, #E5E7EB);
-      position: sticky;
-      top: 0;
-      z-index: 200;
+      background: #FFFFFF;
+      border-bottom: 1px solid #E8EBEF;
+      position: relative;
+      z-index: 100;
     }
     .top-bar-left {
       display: flex;
       align-items: center;
       gap: 16px;
-      min-width: 280px;
-    }
-    .icon-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary, #4B5563);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 150ms ease;
-    }
-    .icon-btn:hover {
-      background: var(--surface-hover, #F3F4F6);
-      color: var(--text-primary, #111827);
+      min-width: 240px;
     }
     .brand-link {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
+      text-decoration: none;
+      color: #10233A;
     }
     .brand-glyph {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background-color: #1E293B;
-      color: #FFFFFF;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-size: 1.25rem;
       font-weight: 800;
-      font-size: 15px;
+      color: #B23A48;
+      letter-spacing: -0.04em;
     }
     .product-title {
-      font-size: 18px;
+      font-size: 1rem;
       font-weight: 700;
-      letter-spacing: -0.01em;
-      color: #111827;
+      letter-spacing: 0.05em;
+      color: #10233A;
     }
     .tenant-selector {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding-left: 12px;
-      border-left: 1px solid var(--border-subtle, #E5E7EB);
+      gap: 8px;
+      padding-left: 14px;
+      border-left: 1px solid #E8EBEF;
     }
     .tenant-name {
-      font-size: 13px;
+      font-size: 0.8125rem;
       font-weight: 600;
-      color: #374151;
+      color: #1C2128;
     }
     .tenant-pill {
-      font-size: 10px;
-      font-weight: 700;
-      padding: 1px 6px;
-      background: #EFF6FF;
-      color: #1D4ED8;
-      border-radius: 999px;
+      font-size: 0.6875rem;
+      color: #51616F;
+      background: #F4F3F0;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 500;
     }
     .top-bar-center {
       flex: 1;
-      max-width: 680px;
+      max-width: 640px;
       margin: 0 24px;
     }
     .search-pill {
       display: flex;
       align-items: center;
-      gap: 12px;
-      height: 44px;
-      padding: 0 16px;
-      background: #F1F3F4;
-      border-radius: 24px;
+      background: #F4F3F0;
       border: 1px solid transparent;
-      transition: all 150ms ease;
+      border-radius: 9999px;
+      padding: 6px 16px;
+      gap: 10px;
+      transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
     }
     .search-pill:focus-within {
       background: #FFFFFF;
-      border-color: #CBD5E1;
-      box-shadow: 0 1px 6px rgba(0, 0, 0, 0.12);
+      border-color: #13328C;
+      box-shadow: 0 1px 3px rgba(19, 50, 140, 0.12), 0 0 0 3px rgba(19, 50, 140, 0.08);
     }
     .search-icon {
-      color: #5F6368;
+      color: #51616F;
+      flex: none;
     }
     .search-input {
-      flex: 1;
       border: none;
       background: transparent;
       outline: none;
-      font-size: 14px;
-      color: #202124;
+      font-size: 0.9375rem;
+      width: 100%;
+      color: #1C2128;
+    }
+    .search-input::placeholder {
+      color: #8A97A2;
     }
     .shortcut-key {
-      font-size: 11px;
-      font-family: monospace;
+      font-size: 0.6875rem;
+      font-family: ui-monospace, monospace;
+      background: #FFFFFF;
+      border: 1px solid #D7DCE0;
+      color: #51616F;
       padding: 2px 6px;
-      background: #E2E8F0;
       border-radius: 4px;
-      color: #64748B;
     }
     .top-bar-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
+      position: relative;
+    }
+    .version-stamp-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #FBFBFA;
+      border: 1px solid #D7DCE0;
+      padding: 4px 10px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: #10233A;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .version-stamp-btn:hover {
+      background: #F4F3F0;
+      border-color: #13328C;
+    }
+    .version-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #0F8A5F;
     }
     .sso-badge {
       display: flex;
       align-items: center;
       gap: 6px;
+      font-size: 0.75rem;
+      background: #F2F5FE;
+      border: 1px solid #C5D5FB;
       padding: 4px 10px;
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      border-radius: 999px;
-      font-size: 11px;
+      border-radius: 9999px;
+      color: #13328C;
     }
     .sso-dot {
       width: 6px;
       height: 6px;
+      background: #0F8A5F;
       border-radius: 50%;
-      background-color: #059669;
     }
     .sso-user {
       font-weight: 600;
-      color: #15803D;
     }
     .sso-provider {
-      color: #166534;
-      font-size: 9px;
-      font-weight: 700;
+      font-size: 0.6875rem;
+      color: #51616F;
       text-transform: uppercase;
+    }
+    .icon-btn {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: none;
+      border-radius: 50%;
+      color: #51616F;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .icon-btn:hover {
+      background: #F4F3F0;
+      color: #10233A;
     }
     .app-switcher-container {
       position: relative;
@@ -257,95 +307,128 @@ import { XTND_FAMILY_APPS, FamilyApp } from '../../components/shell/app-switcher
       position: absolute;
       top: 48px;
       right: 0;
-      width: 320px;
+      width: 340px;
       background: #FFFFFF;
-      border-radius: 12px;
-      border: 1px solid #E5E7EB;
-      box-shadow: 0 16px 36px rgba(0, 0, 0, 0.15);
+      border-radius: 16px;
+      box-shadow: 0 12px 32px rgba(16, 35, 58, 0.16);
+      border: 1px solid #D7DCE0;
       padding: 16px;
-      z-index: 300;
+      z-index: 200;
+      animation: menuPopIn 0.15s cubic-bezier(0.2, 0, 0, 1);
+    }
+    @keyframes menuPopIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
     }
     .popover-header {
       display: flex;
       flex-direction: column;
       margin-bottom: 12px;
       padding-bottom: 8px;
-      border-bottom: 1px solid #F1F3F4;
+      border-bottom: 1px solid #E8EBEF;
     }
     .popover-title {
-      font-size: 13px;
+      font-size: 0.875rem;
       font-weight: 700;
-      color: #111827;
+      color: #10233A;
     }
     .popover-sub {
-      font-size: 10px;
-      color: #6B7280;
+      font-size: 0.6875rem;
+      color: #8A97A2;
     }
     .app-grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 8px;
+      gap: 10px;
     }
     .app-card {
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 10px 8px;
-      border-radius: 8px;
-      transition: background 120ms ease;
       text-align: center;
+      padding: 10px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: background 0.15s ease;
     }
     .app-card:hover {
-      background: #F8FAFC;
+      background: #F4F3F0;
     }
     .app-card-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 8px;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       color: #FFFFFF;
+      font-weight: 700;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 800;
-      font-size: 13px;
-      margin-bottom: 4px;
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+      font-size: 0.875rem;
+      margin-bottom: 6px;
     }
     .app-card-name {
-      font-size: 11px;
-      font-weight: 700;
-      color: #111827;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #10233A;
     }
     .app-card-desc {
-      font-size: 9px;
-      color: #6B7280;
+      font-size: 0.625rem;
+      color: #51616F;
+      margin-top: 2px;
       line-height: 1.2;
-      display: -webkit-box;
-      -webkit-line-clamp: 1;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
     }
-    .user-avatar {
-      width: 34px;
-      height: 34px;
+    .user-avatar-btn {
+      position: relative;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      background-color: #0A1B44;
+      background: #0A1B44;
       color: #FFFFFF;
+      border: none;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-weight: 700;
-      font-size: 12px;
-      border: 2px solid #E2E8F0;
-      cursor: pointer;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      box-shadow: 0 0 0 2px #E8EBEF;
+      transition: all 0.15s ease;
+    }
+    .user-avatar-btn:hover {
+      box-shadow: 0 0 0 3px #13328C;
     }
   `]
 })
 export class TopBarComponent {
-  readonly apps = XTND_FAMILY_APPS;
   readonly switcherOpen = signal(false);
+  readonly userMenuOpen = signal(false);
+  readonly updateModalOpen = signal(false);
+
+  readonly openSettingsModal = output<string>();
+
+  readonly apps: FamilyApp[] = XTND_FAMILY_APPS;
 
   toggleSwitcher() {
-    this.switcherOpen.update(v => !v);
+    this.switcherOpen.set(!this.switcherOpen());
+    if (this.switcherOpen()) {
+      this.userMenuOpen.set(false);
+    }
+  }
+
+  toggleUserMenu() {
+    this.userMenuOpen.set(!this.userMenuOpen());
+    if (this.userMenuOpen()) {
+      this.switcherOpen.set(false);
+    }
+  }
+
+  onOpenSettings(tab: string) {
+    this.userMenuOpen.set(false);
+    this.openSettingsModal.emit(tab);
+  }
+
+  onOpenUpdateModal() {
+    this.userMenuOpen.set(false);
+    this.updateModalOpen.set(true);
   }
 }

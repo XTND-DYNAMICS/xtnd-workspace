@@ -51,7 +51,7 @@ export class XDrivePlugin {
         </div>
         <div style="padding: 12px 16px; display: flex; align-items: center; justify-content: space-between;">
           <span style="font-size: 13px; color: var(--text-muted);">${file.mime_type} · ${(file.size_bytes / 1024).toFixed(1)} KB</span>
-          <a href="https://drive.xgi.io/files/${file.guid}" class="tenant-badge" target="_blank" rel="noopener">Open in XDRIVE ↗</a>
+          <a href="https://drive.xgi.io/files/${file.guid}" class="tenant-badge" target="_blank" rel="noopener">Open in XDRIVE</a>
         </div>
       </div>
     `;
