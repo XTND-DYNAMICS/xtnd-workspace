@@ -146,7 +146,7 @@ import { fileURLToPath } from 'node:url';
 const isMain = process.argv[1] && (import.meta.url === `file://${process.argv[1]}` || fileURLToPath(import.meta.url) === process.argv[1]);
 if (isMain) {
   const rl = createInterface({ input: process.stdin, output: process.stdout, terminal: false });
-  rl.on('line', line => {
+  rl.on('line', (line: string) => {
     if (!line.trim()) return;
     try {
       const parsed = JSON.parse(line) as JsonRpcRequest;
